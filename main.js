@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let input = document.querySelector(".route-item"),
         wrapper = document.querySelector(".route-wrapper"),
         newPoint = document.querySelector(".point"),
-        nums = 0;
+        nums = 0,
+        pointList = [];
 
 
     class Point {
@@ -19,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.point.classList.add("route-item");
             this.point.innerHTML = this.content;
             this.point.style.top = 7 + 57 * (nums - 1) + "px";
+            this.point.setAttribute("id", `${this.id}`);
 
             wrapper.appendChild(this.point);
 
@@ -44,47 +46,70 @@ document.addEventListener('DOMContentLoaded', () => {
     newPoint.addEventListener('click', () => {
         nums++;
         stylingWrapper(nums);
-        
+
         let div = new Point(nums);
         div.addPoint();
+        pointList.push(div);
 
         let deleteBtn = div.point.querySelector(".close");
 
-        deleteBtn.addEventListener('click', () => {  
+        deleteBtn.addEventListener('click', (event) => {  
                 if(confirm("Удалить точку?")) {
+
+                    for(let i in pointList) {
+                        if(pointList[i].id == event.target.parentElement.getAttribute("id")){
+                            pointList.splice(i, 1);
+
+                            for(let j = i; j < pointList.length; j++) {
+                                pointList[j].point.style.top = 7 + 57 * j + "px"; // перемещаем все инпуты, ниже удаленного на одну позицию вверх
+                            }
+                            
+                        }
+                    }
+
                     div.removePoint();
                     nums--;
                     stylingWrapper(nums);
                 }
             });
-    });
 
 
+            function move(e) {
+                div.point.style.top = e.pageY - wrapper.offsetTop - 15 + 'px';
+            }
+            
+            div.point.addEventListener('mousedown', (event) => {
+        
+                if(!event.target.classList.contains("close") && nums > 1) {
 
-    function move(e) {
-        input.style.top = e.pageY - wrapper.offsetTop - 15 + 'px';
-    }
+                    move(event);
+                    div.point.classList.add("move");
+                    div.point.style.zIndex = 1000; 
+        
+                    document.addEventListener('mousemove', move);
+        
+                    div.point.addEventListener('mouseup', () => {
+                    document.removeEventListener('mousemove', move);
+                    div.point.onmouseup = null;
+                    div.point.classList.remove("move");
+                    let h = parseInt(div.point.style.top.slice(0,-2)); 
+                    div.point.style.top = h - h%57 + 5 + "px";
+                    });
 
-    input.addEventListener('mousedown', (event) => {
 
-        if(event.target.classList.contains("close")) {
-            console.log("close");
-        } else {
-            move(event);
-            input.classList.add("move");
-            input.style.zIndex = 1000; 
-
-            document.addEventListener('mousemove', move);
-
-            input.addEventListener('mouseup', () => {
-            document.removeEventListener('mousemove', move);
-            input.onmouseup = null;
-            input.classList.remove("move");
-            let h = parseInt(input.style.top.slice(0,-2)); 
-            input.style.top = h - h%57 + 5 + "px";
+                } 
+                // else {
+                //     console.log("close");
+                // }
             });
-        }
+
+
+
     });
+
+
+
+
 
 
 
