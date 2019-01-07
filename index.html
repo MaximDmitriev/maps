@@ -5,17 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Maps</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="route-wrapper">
-        <div class="route-item" id="ball">
-            <input type="text">
+    <h1>Рассчет маршрута</h1>
+
+    <button class="choise yandex">Яндекс.Карты</button>
+    <button class="choise google">Google.Maps</button>
+
+    <div class="route-section">
+        <div class="route-wrapper">
+            <div class="route-item">
+                <input type="text">
+                <button class="close">&times;</button>
+            </div>
+            <button class="point">Добавить точку</button>
         </div>
-        <!-- <div class="route-item">
-            <input type="text">
-        </div> -->
+        <div class="maps">
+
+        </div>
     </div>
+
+
 
 
     <script src="./main.js"></script>
