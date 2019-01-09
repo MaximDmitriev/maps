@@ -115,11 +115,32 @@ button{
     background-color: #fff;
 }
 
-.maps{
+.map-wrapper{
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: -120px;
     width: 60%;
+}
+.maps{
+    width: 100%;
     height: 50vh;
     border: 2px solid black;
     border-radius: 25px;
 
 }
-
+.yMap{
+    background: url("./img/yandexMaps.png") no-repeat;
+}
+.gMap{
+    display: none;
+    background: url("./img/googleMaps.png") no-repeat;
+}
+.logo{
+    /* display: inline-block; */
+    /* margin-left: 160px; */
+    margin-right: auto;
+    width: 250px;
+    height: 120px;
+    background-size: contain;
+    background-position: center;
+}
