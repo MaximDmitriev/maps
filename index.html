@@ -7,7 +7,9 @@
     <title>Maps</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
 </head>
+<!-- &amp;apikey=<ваш API-ключ> -->
 <body>
     <h1>Расчет маршрута</h1>
 
@@ -30,12 +32,15 @@
             </div>
             <div class="logo gMap">
             </div>
-            <div class="maps">
+            <div class="maps" id="map">
 
             </div>
         </div>
 
     </div>
+
+    <button id="check">check</button>
+    <button id="update">update</button>
 
 
 

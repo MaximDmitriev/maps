@@ -32,11 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
     class Point {
         constructor(id){
             this.id = id;
+            this.adress = "";
             this.dragable = false;
             this.point = document.createElement("div");
             this.content = '<input type="text" class="input">\
                             <button class="close">&times;</button>';
         }
+
         addPoint(){
             this.point.classList.add("route-item");
             this.point.innerHTML = this.content;
@@ -48,8 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
             this.point.style.opacity = 0;
             setTimeout(() => this.point.style.opacity = 1, 400);
         }
+
         removePoint(){
             this.point.remove();
+        }
+
+        getAdress(){
+            this.adress = this.point.querySelector("input").value;
         }
     }
     
@@ -87,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let div = new Point(nums);
         div.addPoint();
+        div.point.querySelector("input").addEventListener('change', () => div.getAdress());
         pointList.push(div);
 
 
@@ -174,11 +182,78 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    /// routing
+
+    let checkBtn = document.querySelector("#check");
+    let updBtn = document.querySelector("#update");
+    
+    ymaps.ready(function(){
+        let map = new ymaps.Map("map", {
+            center: [55.76, 37.64],
+            zoom: 10
+        });
+
+            let route = new ymaps.multiRouter.MultiRoute({
+                referencePoints: [
+
+                ]},
+                {
+                    boundsAutoApply: true,
+                    results: 1
+                });
 
 
+        // checkBtn.addEventListener('click', () => {
+        //     let routeList = [];
+        //     for (let i in pointList) {
+        //         routeList.push(pointList[i].adress);
+        //     }
+           
+            
+        //     let route = new ymaps.multiRouter.MultiRoute({
+        //         referencePoints: [
+        //             `${pointList[0].adress}`,
+        //             `${pointList[1].adress}`
+        //         ]},
+        //         {
+        //             boundsAutoApply: true,
+        //             results: 1
+        //         });
+                               
+
+        //     route.model.setReferencePoints(routeList);
+        //     // route.model.setParams({
+        //     //     results: 1
+        //     // });
+
+        //     map.geoObjects.add(route);
+                
+                
 
 
+        //     // console.log(pointList);
+        //     console.log(routeList);
+        // });
 
+        updBtn.addEventListener('click', () => {
+            let routeList = [];
+            for (let i in pointList) {
+                routeList.push(pointList[i].adress);
+            }
+            map.geoObjects.add(route);
+            route.model.setReferencePoints(routeList);
+        });
+    });
+
+
+    // `${pointList[0].adress}`,
+    // `${pointList[1].adress}`
+
+// // Точка 'метро Арбатская' будет удалена из маршрута.
+// multiRoute.model.setReferencePoints([ 
+//     'метро Смоленская',
+//     'метро Текстильщики'
+// ]);
 
 
 });
