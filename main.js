@@ -18,6 +18,58 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
+    let ready = false;
+    let route;
+    
+    ymaps.ready(function(){
+        ready = true;
+        return ready;
+    });
+
+    function createYandexRoute(adress){
+        let map = new ymaps.Map("map", {
+            center: [55.76, 37.64],
+            zoom: 10
+        });
+
+        route = new ymaps.multiRouter.MultiRoute({
+            referencePoints: [
+                `${adress}`
+            ]},
+            {
+                boundsAutoApply: true,
+                results: 1
+            });
+        map.geoObjects.add(route);
+
+    }
+
+    function updateYandexRoute(newRoute){
+        let routeList = [];
+
+        for (let i in pointList) {
+            routeList.push(pointList[i].adress);
+        }
+        
+        newRoute.model.setReferencePoints(routeList);
+        
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -83,6 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
         input.removePoint();
         nums--;
         stylingWrapper(nums);
+
+        updateYandexRoute(route);  //yandex
     }
 
     stylingWrapper(nums);
@@ -94,7 +148,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let div = new Point(nums);
         div.addPoint();
-        div.point.querySelector("input").addEventListener('change', () => div.getAdress());
+        div.point.querySelector("input").addEventListener('change', () => {
+            div.getAdress();
+            console.log(pointList);
+            if (pointList.length == 1){
+                createYandexRoute(div.adress);
+            } else {
+                updateYandexRoute(route);
+            }
+        });
         pointList.push(div);
 
 
@@ -163,6 +225,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         pointList[targetItem + diff].id = targetItem + diff;
                         pointList[targetItem + diff].point.setAttribute("id", `${targetItem + diff}`);
                         pointList[targetItem + diff].point.style.top = 7 + 57 * (targetItem + diff) + "px";
+
+                        updateYandexRoute(route);
                     }
 
                     if(diff < 0) {
@@ -176,84 +240,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         pointList[targetItem + diff].id = targetItem + diff;
                         pointList[targetItem + diff].point.setAttribute("id", `${targetItem + diff}`);
                         pointList[targetItem + diff].point.style.top = 7 + 57 * (targetItem + diff) + "px";
+
+                        updateYandexRoute(route);
                     }
                 }
             });
         });
     });
 
-    /// routing
 
-    let checkBtn = document.querySelector("#check");
-    let updBtn = document.querySelector("#update");
-    
-    ymaps.ready(function(){
-        let map = new ymaps.Map("map", {
-            center: [55.76, 37.64],
-            zoom: 10
-        });
-
-            let route = new ymaps.multiRouter.MultiRoute({
-                referencePoints: [
-
-                ]},
-                {
-                    boundsAutoApply: true,
-                    results: 1
-                });
-
-
-        // checkBtn.addEventListener('click', () => {
-        //     let routeList = [];
-        //     for (let i in pointList) {
-        //         routeList.push(pointList[i].adress);
-        //     }
-           
-            
-        //     let route = new ymaps.multiRouter.MultiRoute({
-        //         referencePoints: [
-        //             `${pointList[0].adress}`,
-        //             `${pointList[1].adress}`
-        //         ]},
-        //         {
-        //             boundsAutoApply: true,
-        //             results: 1
-        //         });
-                               
-
-        //     route.model.setReferencePoints(routeList);
-        //     // route.model.setParams({
-        //     //     results: 1
-        //     // });
-
-        //     map.geoObjects.add(route);
-                
-                
-
-
-        //     // console.log(pointList);
-        //     console.log(routeList);
-        // });
-
-        updBtn.addEventListener('click', () => {
-            let routeList = [];
-            for (let i in pointList) {
-                routeList.push(pointList[i].adress);
-            }
-            map.geoObjects.add(route);
-            route.model.setReferencePoints(routeList);
-        });
-    });
-
-
-    // `${pointList[0].adress}`,
-    // `${pointList[1].adress}`
-
-// // Точка 'метро Арбатская' будет удалена из маршрута.
-// multiRoute.model.setReferencePoints([ 
-//     'метро Смоленская',
-//     'метро Текстильщики'
-// ]);
 
 
 });
