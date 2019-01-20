@@ -1,5 +1,9 @@
 "use strict";
 
+import Point from "./parts/pointClass";
+import {createYandexRoute, updateYandexRoute} from "./parts/mapsy";
+import {createGoogleRoute, renderRoute} from "./parts/mapsg";
+
 document.addEventListener('DOMContentLoaded', () => {
 
 
@@ -12,13 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
         secondScreen = document.querySelector(".second"),
         arrow = document.querySelector(".arrow"),
         imgChoise = secondScreen.querySelector("img"),
-        yandex = false,
-        google = false;
+        yMode = false,
+        gMode = false;
 
     
     let ready = false;
     let route;
- 
+    let map;
+
     yandexBtn.addEventListener('click', () => {
         googleLogo.style.display = "none";
         yandexLogo.style.display = "block";
@@ -26,11 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
         startScreen.style.display = "none";
         imgChoise.setAttribute("src", "./img/yandexMaps.png");
         secondScreen.style.display = "block";
-        google = false;
+        gMode = false;
         // вставить промис
         ymaps.ready(function(){
             ready = true;
-            yandex = true;
+            yMode = true;
             startScreen.style.display = "none";
             imgChoise.setAttribute("src", "./img/yandexMaps.png");
             secondScreen.style.display = "block";
@@ -46,84 +51,23 @@ document.addEventListener('DOMContentLoaded', () => {
         googleLogo.style.opacity = 1;
         startScreen.style.display = "none";
         imgChoise.setAttribute("src", "./img/googleMaps.png");
-        secondScreen.style.display = "block";
+        secondScreen.style.display = "none"; //
         arrow.style.top = 0;
         arrow.querySelector("img").style.transform = "rotateZ(0)";
-        yandex = false;
-        google = true;
+        yMode = false;
+        gMode = true;
+        mapWindow.innerHTML = "";
+
+        let displayAndService = createGoogleRoute(mapWindow, map);
+
+        renderRoute(...displayAndService);
     });
-
-    function createYandexRoute(adress){
-        let map = new ymaps.Map("map", {
-            center: [55.76, 37.64],
-            zoom: 10,
-            controls: ['zoomControl']
-        }
-        );
-
-        route = new ymaps.multiRouter.MultiRoute({
-            referencePoints: [
-                `${adress}`
-            ],
-            params:
-            {   
-                results: 1
-            }},
-            {
-                boundsAutoApply: true
-            }
-        );
-        map.geoObjects.add(route);
-        route.events.add("change", () => {
-            if(route.model.getReferencePoints().length > 1) map.setBounds(route.getBounds());
-        });
-    }
-
-    function updateYandexRoute(newRoute, list){
-        let routeList = [];
-
-        for (let item of list) {
-            routeList.push(item.adress);
-        }
-        newRoute.model.setReferencePoints(routeList);
-    }
 
 
     let wrapper = document.querySelector(".route-wrapper"),
         newPoint = document.querySelector(".point"),
         nums = 0,
         pointList = [];
-
-    class Point {
-        constructor(id){
-            this.id = id;
-            this.adress = "";
-            this.dragable = false;
-            this.point = document.createElement("div");
-            this.content = '<input type="text" class="input">\
-                            <button class="close">&times;</button>';
-        }
-
-        addPoint(){
-            this.point.classList.add("route-item");
-            this.point.innerHTML = this.content;
-            this.point.style.top = 7 + 57 * (this.id) + "px";
-            this.point.setAttribute("id", `${this.id}`);
-
-            wrapper.appendChild(this.point);
-
-            this.point.style.opacity = 0;
-            setTimeout(() => this.point.style.opacity = 1, 400);
-        }
-
-        removePoint(){
-            this.point.remove();
-        }
-
-        getAdress(){
-            this.adress = this.point.querySelector("input").value;
-        }
-    }
     
     function stylingWrapper(n) {                    //изменение обертки и положения кнопки.
         newPoint.style.top = 57 * n + 10 + "px";
@@ -156,14 +100,14 @@ document.addEventListener('DOMContentLoaded', () => {
    
     newPoint.addEventListener('click', () => {
         
-        if (yandex || google) {
+        if (yMode || gMode) {
             let div = new Point(nums);
-            div.addPoint();
+            div.addPoint(wrapper);
             div.point.querySelector("input").addEventListener('change', () => {
                 div.getAdress();
                 if (pointList.length == 1 && route === undefined){
                     if (mapWindow.innerHTML != "" && route === undefined) mapWindow.innerHTML = "";
-                    createYandexRoute(div.adress);
+                    createYandexRoute(div.adress, map, route);
                 } else {
                     updateYandexRoute(route, pointList);
                 }
@@ -180,9 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nums++;
             stylingWrapper(nums);
     
-    
-    
-    
+
             div.point.addEventListener('mousedown', (event) => {
                 
                 if (!event.target.classList.contains("close") &&
@@ -262,10 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             alert("Выберете систему");
         }
-
-
     });
-
 });
 
 
