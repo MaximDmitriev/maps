@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let ready = false;
     let route;
     let map;
+    let displayAndService;
 
     yandexBtn.addEventListener('click', () => {
         googleLogo.style.display = "none";
@@ -57,10 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
         yMode = false;
         gMode = true;
         mapWindow.innerHTML = "";
-
-        let displayAndService = createGoogleRoute(mapWindow, map);
-
-        renderRoute(...displayAndService);
     });
 
 
@@ -90,13 +87,14 @@ document.addEventListener('DOMContentLoaded', () => {
         nums--;
         stylingWrapper(nums);
 
-        updateYandexRoute(route, pointList);  //yandex
+        yMode ? updateYandexRoute(route, pointList) : renderRoute(pointList, ...displayAndService);
     }
 
     stylingWrapper(nums);
 
     let startHeight,
         targetItem;
+
    
     newPoint.addEventListener('click', () => {
         
@@ -105,15 +103,18 @@ document.addEventListener('DOMContentLoaded', () => {
             div.addPoint(wrapper);
             div.point.querySelector("input").addEventListener('change', () => {
                 div.getAdress();
-                if (pointList.length == 1 && route === undefined){
+
+                if (pointList.length == 0){
+
                     if (mapWindow.innerHTML != "" && route === undefined) mapWindow.innerHTML = "";
-                    createYandexRoute(div.adress, map, route);
+                    yMode ? route = createYandexRoute(div.adress, map, route) : displayAndService = createGoogleRoute(mapWindow, map);
+                    pointList.push(div);
+                   
                 } else {
-                    updateYandexRoute(route, pointList);
+                    pointList.push(div);
+                    yMode ? updateYandexRoute(route, pointList) : renderRoute(pointList, ...displayAndService);
                 }
             });
-            pointList.push(div);
-    
     
             let deleteBtn = div.point.querySelector(".close");
     
@@ -180,8 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             pointList[targetItem + diff].id = targetItem + diff;
                             pointList[targetItem + diff].point.setAttribute("id", `${targetItem + diff}`);
                             pointList[targetItem + diff].point.style.top = 7 + 57 * (targetItem + diff) + "px";
-    
-                            updateYandexRoute(route, pointList);
+
+                            yMode ? updateYandexRoute(route, pointList) : renderRoute(pointList, ...displayAndService);
                         }
     
                         if(diff < 0) {
@@ -196,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             pointList[targetItem + diff].point.setAttribute("id", `${targetItem + diff}`);
                             pointList[targetItem + diff].point.style.top = 7 + 57 * (targetItem + diff) + "px";
     
-                            updateYandexRoute(route, pointList);
+                            yMode ? updateYandexRoute(route, pointList) : renderRoute(pointList, ...displayAndService);
                         }
                     }
                 });
@@ -209,4 +210,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+/* баги :
 
+    1. если номера дома не существует, то берется дом по умолчанию, если при втором вводе одной и той же улицы
+       дом опять не существует, то в массиве пути одинаковые объекты и яндекс не может выставить масштаб
+
+    2. если в существующей точке поменять адрес, то в pointList не затрется предыдущий, а новый добавится
+    3. можно перетаскивать пустой инпут -> рушится скрипт
+
+*/

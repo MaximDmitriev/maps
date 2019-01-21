@@ -1,5 +1,4 @@
 "use strict";
-
 class Point {
     constructor(id){
         this.id = id;
