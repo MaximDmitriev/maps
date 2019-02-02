@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let wrapper = document.querySelector(".route-wrapper"),
         newPoint = document.querySelector(".point"),
+        empty = false,
         nums = 0,
         pointList = [];
     
@@ -90,6 +91,18 @@ document.addEventListener('DOMContentLoaded', () => {
         yMode ? updateYandexRoute(route, pointList) : renderRoute(pointList, ...displayAndService);
     }
 
+    function checkInput() {                         //проверка на незаполненный инпут
+        const element = document.getElementsByClassName("route-item");
+
+        if(element[0] != undefined) {
+            const input = element[element.length - 1].querySelector("input");
+            if(input.value == "") {
+                return true;
+            }
+        }
+        return false;
+    }
+
     stylingWrapper(nums);
 
     let startHeight,
@@ -98,7 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
    
     newPoint.addEventListener('click', () => {
         
-        if (yMode || gMode) {
+        empty = checkInput();
+        
+        if (!empty && (yMode || gMode)) {
             let div = new Point(nums);
             div.addPoint(wrapper);
             div.point.querySelector("input").addEventListener('change', () => {
@@ -129,7 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
             div.point.addEventListener('mousedown', (event) => {
                 
                 if (!event.target.classList.contains("close") &&
-                !event.target.classList.contains("input") && nums > 1) {
+                !event.target.classList.contains("input") && nums > 1 &&
+                div.point.querySelector("input").value !=="") {
                     
                     startHeight = parseInt(event.target.style.top.slice(0,-2));
                     targetItem = parseInt(event.target.id);
@@ -149,6 +165,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
     
                 div.point.addEventListener('mouseup', (event) => {
+
+                    empty = checkInput();
+
+                    if (empty && div.dragable) {                    // если есть пустой инпут, то удалить его
+                        const element = document.getElementsByClassName("route-item");
+                        element[element.length - 1].remove();
+                        nums--;
+                        stylingWrapper(nums);
+                    }
     
                     if(div.dragable){
     
@@ -203,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         } else {
-            alert("Выберете систему");
+            alert("Выберете систему или введите адрес в поле ввода");
         }
     });
 });
@@ -216,6 +241,5 @@ document.addEventListener('DOMContentLoaded', () => {
        дом опять не существует, то в массиве пути одинаковые объекты и яндекс не может выставить масштаб
 
     2. если в существующей точке поменять адрес, то в pointList не затрется предыдущий, а новый добавится
-    3. можно перетаскивать пустой инпут -> рушится скрипт
 
 */
