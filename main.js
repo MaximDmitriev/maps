@@ -1,11 +1,10 @@
 "use strict";
 
 import Point from "./parts/pointClass";
-import {createYandexRoute, updateYandexRoute} from "./parts/mapsy";
+import {createYandexRoute, updateYandexRoute, changeOrderYandexRoute} from "./parts/mapsy";
 import {createGoogleRoute, renderRoute} from "./parts/mapsg";
 
 document.addEventListener('DOMContentLoaded', () => {
-
 
     let yandexBtn = document.querySelector(".yandex"),
         googleBtn = document.querySelector(".google"),
@@ -19,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
         yMode = false,
         gMode = false;
 
-    
     let ready = false;
     let route;
     let map;
@@ -59,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
         gMode = true;
         mapWindow.innerHTML = "";
     });
-
 
     let wrapper = document.querySelector(".route-wrapper"),
         newPoint = document.querySelector(".point"),
@@ -103,6 +100,26 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     }
 
+    function updateAdrs(adresses) {                 //правильные адреса в инпутах, берем их из яндекс апи
+        let inputs = document.querySelectorAll("input");
+
+        pointList.forEach((item, i) => {            //удаление клонов при редактировании или удалении точек
+            item.adress = adresses[i];
+            if(i > 0 && (i + 1) < adresses.length && (adresses[i] === adresses[i + 1] || adresses[0] === adresses[adresses.length - 1])) {
+                adresses.splice(i, 1);
+            }
+            if(i > 0 && (i + 1) < pointList.length && pointList[i].id >= pointList[i + 1].id) {
+                pointList.splice(i + 1, 1);
+            }
+        });
+
+        inputs.forEach((item, i) => {               //замена пользовательского ввода на нормальные адреса
+            if(item.value !=="") {
+                item.value = pointList[i].adress;
+            }
+        });
+    }
+    
     stylingWrapper(nums);
 
     let startHeight,
@@ -113,39 +130,44 @@ document.addEventListener('DOMContentLoaded', () => {
         
         empty = checkInput();
         
-        if (!empty && (yMode || gMode)) {
-            let div = new Point(nums);
+        if (!empty && (yMode || gMode)) { 
+            let div = new Point(nums);  
             div.addPoint(wrapper);
-            div.point.querySelector("input").addEventListener('change', () => {
+            div.point.querySelector("input").addEventListener('change', () => {         //ввод адреса
                 div.getAdress();
 
-                if (pointList.length == 0){
+                if (pointList.length == 0) {                                            //если маршрута еще не было 
 
                     if (mapWindow.innerHTML != "" && route === undefined) mapWindow.innerHTML = "";
                     yMode ? route = createYandexRoute(div.adress, map, route) : displayAndService = createGoogleRoute(mapWindow, map);
                     pointList.push(div);
                    
-                } else {
-                    pointList.push(div);
-                    yMode ? updateYandexRoute(route, pointList) : renderRoute(pointList, ...displayAndService);
+                } else {                                                                //если это уже не первая точка
+                    const index = pointList.findIndex((item) => item.id == div.id);     //смотрим новая это точка или редактирование старой
+                    if (index == -1) {
+                        pointList.push(div);
+                    } else {
+                        pointList[index].getAdress();
+                    }                                               
+                    yMode ? updateYandexRoute(route, pointList)
+                            .then((res) => updateAdrs(res)) : renderRoute(pointList, ...displayAndService);
                 }
             });
     
             let deleteBtn = div.point.querySelector(".close");
     
-            deleteBtn.addEventListener('click', (event) => {  
+            deleteBtn.addEventListener('click', (event) => {                    //удаление точки
                     if(confirm("Удалить точку?")) removeInput(event.target, div);
                 });
     
             nums++;
             stylingWrapper(nums);
-    
 
-            div.point.addEventListener('mousedown', (event) => {
+            div.point.addEventListener('mousedown', (event) => {                //перемещение инпута
                 
                 if (!event.target.classList.contains("close") &&
                 !event.target.classList.contains("input") && nums > 1 &&
-                div.point.querySelector("input").value !=="") {
+                div.point.querySelector("input").value !=="") {                 //убедились, что это не ввод и не удадение
                     
                     startHeight = parseInt(event.target.style.top.slice(0,-2));
                     targetItem = parseInt(event.target.id);
@@ -160,15 +182,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     event.preventDefault();
                     if(div.dragable){
                         div.point.style.top = event.pageY - wrapper.offsetTop - 15 + 'px';
-                    }
-    
+                    }  
                 });
     
-                div.point.addEventListener('mouseup', (event) => {
+                div.point.addEventListener('mouseup', (event) => {              //конец перетаскивания, перерисовка инпутов и перестроение маршрутов
 
                     empty = checkInput();
 
-                    if (empty && div.dragable) {                    // если есть пустой инпут, то удалить его
+                    if (empty && div.dragable) {                                // если есть пустой инпут, то удалить его
                         const element = document.getElementsByClassName("route-item");
                         element[element.length - 1].remove();
                         nums--;
@@ -207,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             pointList[targetItem + diff].point.setAttribute("id", `${targetItem + diff}`);
                             pointList[targetItem + diff].point.style.top = 7 + 57 * (targetItem + diff) + "px";
 
-                            yMode ? updateYandexRoute(route, pointList) : renderRoute(pointList, ...displayAndService);
+                            yMode ? changeOrderYandexRoute(route, pointList) : renderRoute(pointList, ...displayAndService);
                         }
     
                         if(diff < 0) {
@@ -222,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             pointList[targetItem + diff].point.setAttribute("id", `${targetItem + diff}`);
                             pointList[targetItem + diff].point.style.top = 7 + 57 * (targetItem + diff) + "px";
     
-                            yMode ? updateYandexRoute(route, pointList) : renderRoute(pointList, ...displayAndService);
+                            yMode ? changeOrderYandexRoute(route, pointList) : renderRoute(pointList, ...displayAndService);
                         }
                     }
                 });
@@ -239,7 +260,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     1. если номера дома не существует, то берется дом по умолчанию, если при втором вводе одной и той же улицы
        дом опять не существует, то в массиве пути одинаковые объекты и яндекс не может выставить масштаб
-
-    2. если в существующей точке поменять адрес, то в pointList не затрется предыдущий, а новый добавится
 
 */
