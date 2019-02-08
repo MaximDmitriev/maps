@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Maps</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./style.css">
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBobFI6Gd-IwH1z5CNo2F5gtRVVRrFBpsU&callback="
     async defer></script>
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
@@ -35,20 +35,40 @@
                 </div>
 
                 <div class="start">
-                    <p>Выберете тип карт <br>
-                        <span>(в дальнейшем тип можно поменять)</span>
-                    </p>
+                    <p>Выберете тип карт</p>
                 </div>
 
                 <div class="second">
                     <img class="imgMap" src="./img/yandexMaps.png" alt="map-logo">
                     <p>Теперь создавайте маршрут</p>
+                    <p class="list">Несколько ограничений:
+                        <ul>
+                            <li>Нельзя удалить последнюю оставшуюся точку маршрута</li>
+                            <li>Нельзя перемещать пустую точку маршрута</li>
+                            <li>Нельзя перемещать единственную заполненную точку маршрута</li>
+                        </ul>
+                    </p>
                 </div>
             </div>
         </div>
 
     </div>
-    <!-- <script src="./main.js"></script> -->
+
+    <div class="overlay" id="delete">
+        <div class="modal-delete">
+            <h2 class="modal-title">Удалить точку</h2>
+            <button class="modal-button confirm">Да</button>
+            <button class="modal-button cancel">Отмена</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="empty">
+        <div class="modal-empty">
+            <h2 class="modal-title">Введите адрес в поле ввода</h2>
+            <button class="modal-button cancel">OK</button>
+        </div>
+    </div>
+
     <script src="./index.js"></script>
    
 </body>

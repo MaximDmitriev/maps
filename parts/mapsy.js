@@ -26,7 +26,10 @@ function createYandexRoute(adress, map, route){
         if(route.model.getReferencePoints().length > 1) map.setBounds(route.getBounds());
     });
 
-    return route;
+    return {
+            route: route,
+            map: map
+            };
 }
 
 function updateYandexRoute(newRoute, list) {
@@ -47,13 +50,13 @@ function updateYandexRoute(newRoute, list) {
                     return item.name;
                 });
                 resolve(routeList);
+            });
         });
-    });
-    // promise.then((fullfield) => {return fullfield;});
-    console.log(routeList);
-    return promise;
+        
+        return promise;
     }
-    let arr = upd();  // здесь проблема надо что-то типа async await
+    let arr = upd();  
+
     return arr;
 
 }

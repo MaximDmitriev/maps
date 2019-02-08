@@ -15,13 +15,35 @@ document.addEventListener('DOMContentLoaded', () => {
         secondScreen = document.querySelector(".second"),
         arrow = document.querySelector(".arrow"),
         imgChoise = secondScreen.querySelector("img"),
+        newPoint = document.querySelector(".point"),
+        overDelete = document.querySelector("#delete"),
+        overEmpty = document.querySelector("#empty"),
+        emptyBtn = overEmpty.querySelector("button"),
+        confirmDelBtn = overDelete.querySelector(".confirm"),
+        cancelDelBtn = overDelete.querySelector(".cancel"),
+        del = false,                                            // для маркировки навешен ли уже обработчик на кнопку подтверждения удаления
         yMode = false,
         gMode = false;
+
+    overDelete.style.display = "none";
+    overEmpty.style.display = "none";
+
+    emptyBtn.addEventListener('click', () => {
+        overEmpty.style.display = "none";
+    });
+
+    cancelDelBtn.addEventListener('click', () => {
+        del = true;
+        overDelete.style.display = "none";
+    });
 
     let ready = false;
     let route;
     let map;
     let displayAndService;
+
+
+    newPoint.disabled = true;
 
     yandexBtn.addEventListener('click', () => {
         googleLogo.style.display = "none";
@@ -31,7 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
         imgChoise.setAttribute("src", "./img/yandexMaps.png");
         secondScreen.style.display = "block";
         gMode = false;
-        // вставить промис
+        googleBtn.disabled = true;
+        newPoint.disabled = false;
         ymaps.ready(function(){
             ready = true;
             yMode = true;
@@ -50,16 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
         googleLogo.style.opacity = 1;
         startScreen.style.display = "none";
         imgChoise.setAttribute("src", "./img/googleMaps.png");
-        secondScreen.style.display = "none"; //
+        secondScreen.style.display = "block"; //
         arrow.style.top = 0;
         arrow.querySelector("img").style.transform = "rotateZ(0)";
         yMode = false;
         gMode = true;
-        mapWindow.innerHTML = "";
+        yandexBtn.disabled = true;
+        newPoint.disabled = false;
     });
 
-    let wrapper = document.querySelector(".route-wrapper"),
-        newPoint = document.querySelector(".point"),
+    let wrapper = document.querySelector(".route-wrapper"),      
         empty = false,
         nums = 0,
         pointList = [];
@@ -119,7 +142,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
+    const removePoint = (elem, input) => {
+
+        removeInput(elem, input);
+        overDelete.style.display = "none";
+        del = false;
+    }
+
     stylingWrapper(nums);
 
     let startHeight,
@@ -139,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (pointList.length == 0) {                                            //если маршрута еще не было 
 
                     if (mapWindow.innerHTML != "" && route === undefined) mapWindow.innerHTML = "";
-                    yMode ? route = createYandexRoute(div.adress, map, route) : displayAndService = createGoogleRoute(mapWindow, map);
+                    yMode ? {route, map} = createYandexRoute(div.adress, map, route) : {displayAndService, map} = createGoogleRoute(mapWindow, map);
                     pointList.push(div);
                    
                 } else {                                                                //если это уже не первая точка
@@ -151,13 +181,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     }                                               
                     yMode ? updateYandexRoute(route, pointList)
                             .then((res) => updateAdrs(res)) : renderRoute(pointList, ...displayAndService);
+                    // console.log("pointList.length", pointList.length); /////
                 }
             });
     
             let deleteBtn = div.point.querySelector(".close");
     
             deleteBtn.addEventListener('click', (event) => {                    //удаление точки
-                    if(confirm("Удалить точку?")) removeInput(event.target, div);
+
+                if(pointList.length < 2) {                                      //нельзя удалить единственную точку и пустой инпут после нее
+                    return false;
+                }
+
+                overDelete.style.display = "flex";
+
+                if(!del){
+
+                    del = true;
+                    confirmDelBtn.addEventListener('click', () => removePoint(event.target, div), {once: true});
+                    }
                 });
     
             nums++;
@@ -167,7 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (!event.target.classList.contains("close") &&
                 !event.target.classList.contains("input") && nums > 1 &&
-                div.point.querySelector("input").value !=="") {                 //убедились, что это не ввод и не удадение
+                div.point.querySelector("input").value !=="" &&
+                pointList.length > 1) {                                         //убедились, что это не ввод и не удадение, не пустой инпут и не единственная точка
                     
                     startHeight = parseInt(event.target.style.top.slice(0,-2));
                     targetItem = parseInt(event.target.id);
@@ -209,10 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         h < 0 ? div.point.style.top = "7px" : div.point.style.top = h - h%57 + 7 + "px";
                         
                         let diff = ((h - h%57 + 7 - startHeight) / 57) | 0; // насколько элементов сдвинулись
-                        // if(diff == 0) {
-    
-                        // }
-                        
+
                         let temp = pointList[targetItem];
                         
                         if(diff > 0) {
@@ -249,16 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         } else {
-            alert("Выберете систему или введите адрес в поле ввода");
+            overEmpty.style.display = "block";
         }
     });
 });
-
-
-
-/* баги :
-
-    1. если номера дома не существует, то берется дом по умолчанию, если при втором вводе одной и той же улицы
-       дом опять не существует, то в массиве пути одинаковые объекты и яндекс не может выставить масштаб
-
-*/

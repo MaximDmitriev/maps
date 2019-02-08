@@ -11,12 +11,24 @@
     outline: none;
 }
 
+ul{
+    margin: 15px;
+}
+
+li{
+    list-style-type: none;
+}
+
 h1{
     margin-left: 30px;
     margin-top: 30px;
 }
 button{
     transition: 0.4s;
+}
+button:disabled{
+    background-color: #f0ebeb;
+    border: 1px solid black;
 }
 .choise{
     margin-left: 30px;
@@ -150,6 +162,11 @@ button{
     margin-top: 30px;
     font-size: 24px;
 }
+
+.second .list{
+    text-align: left;
+    margin-left: 15px;
+}
 .second img{
     width: 400px;
     margin-left: 50%;
@@ -186,4 +203,63 @@ button{
     background-position: center;
     opacity: 0;
     transition: 0.4s;
+}
+.overlay{
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+.modal-delete{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-around;
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    height: 250px;
+    border: 1px solid #000000;
+    border-radius: 25px;
+    background-color: #fff;
+}
+.modal-title{
+    width: 100%;
+    text-align: center;
+}
+.modal-button{
+    width: 90px;
+    height: 40px;
+    font-size: 16px;
+}
+.confirm{
+    background-color: #fff;
+    color: #000000;
+    border: 1px solid #000000;
+    border-radius: 10px;
+}
+.cancel{
+    background-color: #5294ff;
+    border: 1px solid #0046b8;
+    color: #fff;
+    border-radius: 10px;
+}
+.modal-empty{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    height: 250px;
+    border: 1px solid #000000;
+    border-radius: 25px;
+    background-color: #fff;
 }

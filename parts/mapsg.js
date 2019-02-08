@@ -14,7 +14,10 @@ function createGoogleRoute(elem, map) {
     arr.push(directionsService);
     arr.push(directionsDisplay);
 
-    return arr;       
+    return {
+            displayAndService: arr,
+            map: map
+          };       
 }
 
 
